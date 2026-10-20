@@ -21,7 +21,7 @@ library UniswapV2Library {
                 hex'ff',
                 factory,
                 keccak256(abi.encodePacked(token0, token1)),
-                hex'96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f' // init code hash
+                hex'aca1ccabeb7f7ab2c02ce4b71aedce2f168b7f7342d088171b51b665bf65923d' // init code hash (Nagara LP/NGR-LP UniswapV2Pair)
             ))));
     }
 
