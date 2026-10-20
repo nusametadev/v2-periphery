@@ -12,7 +12,7 @@ async function deployAllFixture() {
 
   const wngrx = await ethers.deployContract('WNGRX')
   const FactoryFactory = await getFactoryFactory(wallet)
-  const factory = await FactoryFactory.deploy(wallet.address)
+  const factory = await FactoryFactory.deploy(wallet.address, await wngrx.getAddress(), wallet.address)
   const router = await ethers.deployContract('UniswapV2Router02', [await factory.getAddress(), await wngrx.getAddress()])
 
   // Mock ERC20 standing in for MINAR.
@@ -88,5 +88,23 @@ describe('Nagara DEX integration (local hardhat network)', () => {
     await router.removeLiquidityETH(minarAddress, liquidity, 0, 0, wallet.address, deadline)
     expect(await pair.balanceOf(wallet.address)).to.eq(0)
     expect(await minar.balanceOf(wallet.address)).to.be.above(minarBalBeforeRemove)
+  })
+
+  it('non-WNGRX pairs are blocked until whitelisted by the admin', async () => {
+    const minarAddress = await minar.getAddress()
+    const other = await ethers.deployContract('ERC20', [ethers.parseUnits('10000', 18)])
+    const otherAddress = await other.getAddress()
+    const routerAddress = await router.getAddress()
+    const amount = ethers.parseUnits('100', 18)
+    await minar.approve(routerAddress, amount)
+    await other.approve(routerAddress, amount)
+
+    await expect(
+      router.addLiquidity(minarAddress, otherAddress, amount, amount, 0, 0, wallet.address, ethers.MaxUint256)
+    ).to.be.reverted
+
+    await factory.setPairAllowed(minarAddress, otherAddress, true)
+    await router.addLiquidity(minarAddress, otherAddress, amount, amount, 0, 0, wallet.address, ethers.MaxUint256)
+    expect(await factory.getPair(minarAddress, otherAddress)).to.eq(pairFor(await factory.getAddress(), minarAddress, otherAddress))
   })
 })

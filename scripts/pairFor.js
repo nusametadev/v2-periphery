@@ -6,7 +6,7 @@
 const { ethers } = require('hardhat')
 
 // Keep this in sync with contracts/libraries/UniswapV2Library.sol.
-const INIT_CODE_HASH = '0xaca1ccabeb7f7ab2c02ce4b71aedce2f168b7f7342d088171b51b665bf65923d'
+const INIT_CODE_HASH = '0x6b9987938e755b2114d535286366c6b8f639ef01036880f67b713c25e4f4771c'
 
 function pairFor(factoryAddress, tokenA, tokenB) {
   const [token0, token1] = tokenA.toLowerCase() < tokenB.toLowerCase() ? [tokenA, tokenB] : [tokenB, tokenA]
