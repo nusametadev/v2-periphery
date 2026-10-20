@@ -41,6 +41,14 @@ vendored at `artifacts-import/UniswapV2Factory.json` and `artifacts-import/Unisw
 (copied straight from v2-core's own `artifacts/` after running `npm run compile` there).
 Re-copy those two files whenever v2-core's contracts or compiler settings change.
 
+### NGRX-only pairs
+
+The v2-core Factory (`feat/ngrx-pair-whitelist`) only creates pairs that include WNGRX. Pairs without WNGRX
+must be whitelisted by `Factory.admin` via `setPairAllowed(tokenA, tokenB, true)` before `addLiquidity` /
+`createPair`. The constructor is `(feeToSetter, wngrx, admin)`; `scripts/deploy.js` uses the deployer for
+`admin` unless `ADMIN` is set. Changing the Factory changes the Pair metadata hash, so the vendored
+artifacts and `INIT_CODE_HASH` were regenerated.
+
 ### Commands
 
 - Build: `npm run compile`
@@ -53,7 +61,7 @@ Re-copy those two files whenever v2-core's contracts or compiler settings change
   - Local: `npx hardhat run scripts/deploy.js --network hardhat`
   - Testnet: `PRIVATE_KEY=0x... npx hardhat run scripts/deploy.js --network nagaraTestnet`
   - Mainnet: `PRIVATE_KEY=0x... npx hardhat run scripts/deploy.js --network nagara`
-  - Copy `.env.example` to `.env` to set `PRIVATE_KEY`, `FEE_TO_SETTER`, `MINAR_ADDRESS` instead
+  - Copy `.env.example` to `.env` to set `PRIVATE_KEY`, `FEE_TO_SETTER`, `ADMIN`, `MINAR_ADDRESS` instead
     of passing them inline. `.env` is gitignored; never commit it.
 
 Deploy order (enforced by `scripts/deploy.js`): **WNGRX -> Factory -> Router02 -> optionally

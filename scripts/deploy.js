@@ -28,11 +28,13 @@ async function main() {
 
   // 2. Factory (vendored v2-core artifact, see scripts/v2core.js)
   const feeToSetter = process.env.FEE_TO_SETTER || deployer.address
+  // Pairs must include WNGRX; pairs without it need admin whitelisting (setPairAllowed).
+  const admin = process.env.ADMIN || deployer.address
   const FactoryFactory = await getFactoryFactory(deployer)
-  const factory = await FactoryFactory.deploy(feeToSetter)
+  const factory = await FactoryFactory.deploy(feeToSetter, wngrxAddress, admin)
   await factory.waitForDeployment()
   const factoryAddress = await factory.getAddress()
-  console.log(`UniswapV2Factory deployed: ${factoryAddress} (feeToSetter=${feeToSetter})`)
+  console.log(`UniswapV2Factory deployed: ${factoryAddress} (feeToSetter=${feeToSetter}, admin=${admin})`)
 
   // 3. Router02
   const router = await ethers.deployContract('UniswapV2Router02', [factoryAddress, wngrxAddress])
@@ -89,6 +91,7 @@ async function main() {
     factory: factoryAddress,
     router: routerAddress,
     feeToSetter,
+    admin,
     initCodeHash: require('./pairFor').INIT_CODE_HASH,
     pairsCreated,
     deployedAt: new Date().toISOString()
